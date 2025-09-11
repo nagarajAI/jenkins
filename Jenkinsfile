@@ -3,6 +3,7 @@ pipeline{
 
     parameters{
         string(name:"NAME", defaultValue:"admin", description:"Enter user name")
+        booleanParam(name:"DEBUG", defaultValue:false, description:"ON/OFF debug mode")
     }
     stages{
         stage('first'){
@@ -10,6 +11,7 @@ pipeline{
                 echo "first stage job"
                 sh 'pwd'
                 echo "$NAME"
+                echo "DebugMode: ${param.DEBUG}"
             }
         }
         stage('two'){
