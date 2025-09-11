@@ -14,6 +14,7 @@ pipeline{
                 sh 'pwd'
                 echo "$NAME"
                 echo "DebugMode: $DEBUG"
+                sh 'sleep 10'
             }
         }
         stage('two'){
@@ -21,6 +22,7 @@ pipeline{
                 echo "secong stage job"
                 sh 'whoami'
                 echo "$CHOICES selected."
+                sh 'sleep 10'
             }
         }
     }
