@@ -1,0 +1,24 @@
+pipeline{
+    agent any 
+
+    stages{
+        stage('first'){
+            steps{
+                echo "first stage job"
+                sh 'pwd'
+            }
+        }
+        stage('two'){
+            steps{
+                echo "Stage two"
+                sh 'whoami'
+            }
+        }
+        stage('three'){
+            steps{
+                echo "Stage three"
+                sh 'ls -la'
+            }
+        }
+    }
+}
