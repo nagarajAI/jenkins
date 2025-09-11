@@ -4,7 +4,9 @@ pipeline{
     parameters{
         string(name:"NAME", defaultValue:"admin", description:"Enter user name")
         booleanParam(name:"DEBUG", defaultValue:false, description:"ON/OFF debug mode")
+        choice(name:"CHOICES", defaultValues:['apple','orange','banana'])
     }
+
     stages{
         stage('first'){
             steps{
@@ -18,6 +20,7 @@ pipeline{
             steps{
                 echo "secong stage job"
                 sh 'whoami'
+                echo "$CHOICES selected."
             }
         }
     }
