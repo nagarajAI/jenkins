@@ -4,7 +4,7 @@ pipeline{
     parameters{
         string(name:"NAME", defaultValue:"admin", description:"Enter user name")
         booleanParam(name:"DEBUG", defaultValue:false, description:"ON/OFF debug mode")
-        choice(name:"CHOICES", defaultValue:['apple','orange','banana'])
+        choice(name:"CHOICES", choices:['apple','orange','banana'])
     }
 
     stages{
