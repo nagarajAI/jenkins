@@ -11,7 +11,7 @@ pipeline{
                 echo "first stage job"
                 sh 'pwd'
                 echo "$NAME"
-                echo "DebugMode: ${param.DEBUG}"
+                echo "DebugMode: $DEBUG"
             }
         }
         stage('two'){
