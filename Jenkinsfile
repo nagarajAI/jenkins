@@ -9,6 +9,7 @@ pipeline{
             steps{
                 echo "first stage job"
                 sh 'pwd'
+                echo "$NAME"
             }
         }
         stage('two'){
