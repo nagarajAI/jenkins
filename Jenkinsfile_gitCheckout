@@ -1,6 +1,10 @@
 pipeline{
     agent any
 
+    environment{
+        APP_NAME="myApp"
+        VERSION="2.8.1"
+    }
     stages{
         stage('checkout'){
             steps{
@@ -14,6 +18,11 @@ pipeline{
                 pwd
                 sleep 5
                 '''
+            }
+        }
+        stage('Envs'){
+            steps{
+                echo "App:${env.APP_NAME} Ver: ${env.VERSION}"
             }
         }
         stage('final'){
