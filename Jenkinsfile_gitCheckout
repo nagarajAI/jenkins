@@ -1,0 +1,25 @@
+pipeline{
+    agent any
+
+    stages{
+        stage('checkout'){
+            steps{
+                git url:"https://github.com/nagarajAI/jenkins.git" branch: "main"
+            }
+        }
+        stage('view_repo'){
+            steps{
+                sh'''
+                ls -lrt
+                pwd
+                sleep 5
+                '''
+            }
+        }
+        stage('final'){
+            steps{
+                echo "final stage"
+            }
+        }
+    }
+}
