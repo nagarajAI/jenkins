@@ -1,0 +1,33 @@
+pipeline{
+    agent any
+
+    environment{
+        TEST=false
+    }
+
+    stages{
+        stage('checkout'){
+            steps{
+                echo "git checkout"
+            }
+        }
+        stage('test'){
+            steps{
+                //STATUS-->SUCCESS, FAILURE, UNSTABLE, ABORTED, NOT_BUILT
+                // Override manualy use--> currentBuild.result='SUCCESS'
+
+                catchError(stageResult:'FAILURE', buildResult:'SUCCESS'){
+                    echo "Tesing..."
+                    sh 'exit 1'
+                    env.TEST=true
+                }
+            }
+        }
+        stage('verify'){
+            steps{
+                // TEST=false, if test stage failed, if not TEST=true
+                echo 'TEST: ${env.TEST}'
+            }
+        }
+    }
+}
