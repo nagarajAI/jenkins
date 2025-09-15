@@ -1,0 +1,33 @@
+pipeline{
+    agent any 
+    environment{
+        STAGE_A='empty'
+        STAGE_B='empty'
+    }
+    stages{
+        stage('Checkout'){
+            steps{
+                echo "Checking Repo.."
+                sh 'sleep 2'
+            }
+        }
+        stage('Parallel'){
+            parallel{
+                stage('stageA'){
+                    echo 'StageA...'
+                    sh 'sleep 3'
+            
+                }
+                  stage('stageB'){
+                    echo 'StageB...'
+                    sh 'sleep 3'
+                }
+            }
+        }
+        stage('Verify'){
+            steps{
+
+            }
+        }
+    }
+}
