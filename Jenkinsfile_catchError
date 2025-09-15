@@ -10,6 +10,7 @@ pipeline{
             // agent {label 'slave1'}
             steps{
                 echo "git checkout"
+                echo "change in main"
             }
         }
         stage('test'){
