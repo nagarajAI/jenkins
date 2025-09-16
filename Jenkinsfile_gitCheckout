@@ -7,9 +7,10 @@ pipeline{
     }
     stages{
         stage('checkout'){
-             agent {label 'slave1'}
+            agent {label 'slave1'}
             steps{
                 git url:"https://github.com/nagarajAI/jenkins.git", branch: "main"
+                sh 'hostname'
             }
         }
         stage('view_repo'){
