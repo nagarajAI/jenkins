@@ -21,7 +21,7 @@ pipeline{
                 catchError(stageResult:'FAILURE', buildResult:'SUCCESS'){
                     echo "Tesing..."
                     sh 'exit 1'
-                    env.TEST=true
+                    sh 'env.TEST=true'
                 }
             }
         }
