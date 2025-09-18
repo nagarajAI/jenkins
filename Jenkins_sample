@@ -1,0 +1,177 @@
+pipeline {
+    agent any
+    // agent {label 'labelName'}. TYPES-> any, label, none, docker
+    /************************
+     * OPTIONS / ENV
+     ************************/
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '20'))
+        disableConcurrentBuilds()
+        timeout(time: 60, unit: 'MINUTES')
+        timestamps()
+    }
+
+    environment {
+        // Global variables
+        APP_ENV = 'dev'
+        BUILD_TAG = "${env.JOB_NAME}-${env.BUILD_NUMBER}"
+        SECRET   = credentials('my-secret-id')
+    }
+
+    /************************
+     * PARAMETERS
+     ************************/
+    parameters {
+        string(name: 'BRANCH', defaultValue: 'main', description: 'Git branch')
+        booleanParam(name: 'RUN_TESTS', defaultValue: true, description: 'Run test stage?')
+        choice(name: 'DEPLOY_ENV', choices: ['dev','staging','prod'], description: 'Deployment target')
+    }
+
+    /************************
+     * TRIGGERS – ALL TYPES
+     ************************/
+    triggers {
+        // 1. Cron (scheduled build)
+        cron('H 2 * * *')           // daily at 2 AM
+
+        // 2. SCM polling
+        pollSCM('H/15 * * * *')     // every 15 minutes
+
+        // 3. GitHub push trigger (requires GitHub plugin)
+        githubPush()                // build on GitHub push
+
+        // 4. GitLab push trigger (requires GitLab plugin)
+        gitlabPush(triggerOnPush: true, triggerOnMergeRequest: true)
+
+        // 5. Bitbucket
+        bitbucketPush()
+
+        // 6. Upstream project completion
+        upstream(
+            upstreamProjects: 'other-job',
+            threshold: hudson.model.Result.SUCCESS
+        )
+
+        // 7. Generic trigger (via Generic Webhook Trigger plugin)
+        // genericTrigger(...)   // example if plugin installed
+    }
+
+    /************************
+     * TOOLS
+     ************************/
+    tools {
+        jdk 'JDK11'
+        maven 'Maven3'
+    }
+
+    /************************
+     * STAGES
+     ************************/
+    stages {
+
+        stage('Init') {
+            steps {
+                cleanWs()
+                checkout scm
+                echo "Triggered by: ${currentBuild.rawBuild.getCauses()}"
+            }
+        }
+
+        stage('Build') {
+            steps {
+                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                    sh 'mvn clean compile'
+                }
+            }
+        }
+
+        stage('Parallel Testing') {
+            when { expression { params.RUN_TESTS } }
+            parallel {
+                stage('Unit') {
+                    steps {
+                        catchError(stageResult: 'UNSTABLE') {
+                            sh 'mvn test -Dgroups=unit'
+                        }
+                    }
+                }
+                stage('Integration') {
+                    steps {
+                        catchError(stageResult: 'UNSTABLE') {
+                            sh 'mvn verify -Dgroups=integration'
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Advanced Scripted Example') {
+            steps {
+                script {
+                    // try/catch/finally
+                    try {
+                        echo "Doing something risky"
+                        sh 'some-risky-command'
+                    } catch (err) {
+                        echo "Caught: ${err}"
+                        currentBuild.result = 'UNSTABLE'
+                    } finally {
+                        echo "Cleanup logic"
+                    }
+
+                    // Dynamic parallel execution
+                    def matrixStages = [:]
+                    for (int i = 1; i <= 3; i++) {
+                        matrixStages["DynamicJob${i}"] = {
+                            sh "echo Running job ${i}"
+                        }
+                    }
+                    parallel matrixStages
+                }
+            }
+        }
+
+        stage('Deploy') {
+            when { anyOf { branch 'main'; branch 'release/*' } }
+            steps {
+                script {
+                    if (params.DEPLOY_ENV == 'prod') {
+                        input message: "Deploy to production?", ok: "Deploy"
+                    }
+                    sh "./deploy.sh ${params.DEPLOY_ENV}"
+                    // Manually override stage/build result
+                    currentBuild.result = 'SUCCESS'
+                }
+            }
+        }
+    }
+
+    /************************
+     * POST ACTIONS
+     ************************/
+    post {
+        always {
+            echo 'Pipeline completed.'
+            cleanWs()
+        }
+        success {
+            mail to: 'team@example.com',
+                 subject: "SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                 body: "Build succeeded."
+        }
+        failure {
+            mail to: 'team@example.com',
+                 subject: "FAILURE: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                 body: "Build failed."
+        }
+        unstable {
+            echo 'Marked as UNSTABLE.'
+        }
+        aborted {
+            echo 'Build was aborted by user or system.'
+        }
+        changed {
+            echo 'Build result changed from previous run.'
+        }
+    }
+}
