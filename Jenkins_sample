@@ -44,7 +44,7 @@ pipeline {
         gitlabPush(triggerOnPush: true, triggerOnMergeRequest: true)
 
         // 5. Bitbucket
-        bitbucketPush()
+        // bitbucketPush()
 
         // 6. Upstream project completion
         upstream(
