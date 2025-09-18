@@ -40,7 +40,7 @@ pipeline {
         // 3. GitHub push trigger (requires GitHub plugin)
         githubPush()                // build on GitHub push
 
-        // 4. GitLab push trigger (requires GitLab plugin)
+        // 4. GitLab push trigger (requires GitLab plugin) 
         gitlabPush(triggerOnPush: true, triggerOnMergeRequest: true)
 
         // 5. Bitbucket
